@@ -50,10 +50,7 @@ class Simulation():
         full_matrix = compressed_matrix[item_to_cluster][:, item_to_cluster]
         
         # Step 4: Ensure transitivity by raising matrix to power of items
-        # Use boolean operations to avoid overflow and keep values as 0/1
-        result = full_matrix.astype(float)
-        for _ in range(items - 1):
-            result = result @ full_matrix
-            result = (result > 0).astype(int)
+        # Use boolean matrix to minimize overflow, then convert back to int
+        result = np.linalg.matrix_power(full_matrix.astype(bool), items).astype(int)
         
-        return result.astype(int)
+        return result
