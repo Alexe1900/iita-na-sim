@@ -5,6 +5,8 @@ import pandas as pd
 
 import iita_python as iita
 
+from .blim import BlimSim
+
 class Simulation():
     def __init__(self):
         pass
@@ -54,3 +56,37 @@ class Simulation():
         result = np.linalg.matrix_power(full_matrix.astype(bool), items).astype(int)
         
         return result
+    
+    def generate_from_params(
+            self,
+            items: int,
+            edge_probability: float,
+            subjects: int,
+            beta_range: tuple,
+            eta_range: tuple,
+            max_noise_sum: float = 0.7,
+            sigma: float = 0.1,
+            mu: float = 0.5,
+            buff: float|np.ndarray = 5,
+        ) -> np.ndarray:
+        """
+        Generates random response patterns optimized for KST.
+
+        No missingness supported yet.
+        """
+
+        surmise_relation = self.generate_surmise_relation(items, edge_probability)
+        qo = iita.QuasiOrder(surmise_relation)
+
+        blim_model = BlimSim(
+            beta=np.random.uniform(*beta_range, items),
+            eta=np.random.uniform(*eta_range, items),
+            qo=qo,
+            miss=None, #todo: add missingness support
+            items=items,
+            max_noise_sum=max_noise_sum
+        )
+
+        blim_model.set_standard_state_distr(sigma, mu, buff)
+
+        return blim_model.simulate(subjects, miss=False)

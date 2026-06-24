@@ -21,7 +21,15 @@ class BlimSim():
 
     items: int
 
-    def __init__(self, beta: np.ndarray, eta: np.ndarray, qo: QuasiOrder, miss: np.ndarray | None, items: int):
+    def __init__(
+            self,
+            beta: np.ndarray,
+            eta: np.ndarray,
+            qo: QuasiOrder,
+            miss: np.ndarray | None,
+            items: int,
+            max_noise_sum: float = 0.7
+        ):
         self.o2p_runner = o2p.Oct2Py()
         self.beta = beta
         self.eta = eta
@@ -34,16 +42,15 @@ class BlimSim():
 
         self.o2p_runner.octave.addpath('./sample.m')
 
-    def generate_beta_eta(self, random_beta: callable, random_eta: callable, max_sum: float = 0.7):
-        beta_unsorted = random_beta(0, 1, self.items)
-        eta_unsorted = random_eta(0, 1, self.items)
+        self.sort_beta_eta(max_sum=max_noise_sum)
 
+    def sort_beta_eta(self, max_sum: float = 0.7):
         predecessors_count = self.qo.full_matrix.sum(axis=0)
 
         sorting_order = np.argsort(predecessors_count)
 
-        beta_sorted = beta_unsorted[sorting_order]
-        eta_sorted = eta_unsorted[np.flip(sorting_order)]
+        beta_sorted = self.beta[sorting_order]
+        eta_sorted = self.eta[np.flip(sorting_order)]
 
         summed = beta_sorted + eta_sorted
         if summed.max() > max_sum:
@@ -58,7 +65,7 @@ class BlimSim():
             x_norm = x / self.items
             return np.exp(-0.5 * ((x_norm - mu) / sigma) ** 2)
         
-        self.states_distr = gauss(self.states.sum(axis=1))
+        self.states_distr = gauss(self.states.sum(axis=0))
         self.states_distr += buff
         self.states_distr /= self.states_distr.sum()
     
