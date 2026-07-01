@@ -1,4 +1,4 @@
-function [pat,freq,samp] = sample(model,sz)
+function [pat,freq,samp] = sampleBLIM(model,sz)
 
 % Simulation of a sample with the BLIM model.
 %
@@ -6,9 +6,9 @@ function [pat,freq,samp] = sample(model,sz)
 % same numerosity of the patterns, and finally the matrix sx times items
 % containing all the generated response pattern with repetition
 %
-% [PAT,FREQ,SAMP]=SAMPLE(BETA,ETA,PJ,STATES,SZ)
+% [PAT,FREQ,SAMP]=SAMPLEBLIM(BETA,ETA,PJ,STATES,SZ)
 %
-% [PAT,FREQ,~]=SAMPLE(BETA,ETA,PJ,STATES,SZ)
+% [PAT,FREQ,~]=SAMPLEBLIM(BETA,ETA,PJ,STATES,SZ)
 %
 % where:
 % - model is the outcome of an application of the BLIM
@@ -33,13 +33,13 @@ end
 [M,fm] = patfreq(model.miss);
 pm = fm/sz;
 
-beta = model.classes'*model.beta;
-eta = model.classes'*model.eta;
+beta = double(model.classes)'*double(model.beta);
+eta = double(model.classes)'*double(model.eta);
 pc = cumsum(model.pi);
 pmc = cumsum(pm);
 samp = zeros(sz,nitems);
-wa = model.states;
-wb = 1-wa;
+wa = double(model.states);
+wb = double(1-wa);
 for i = 1:sz
     j=find(pc>=rand,1);
     m=find(pmc>=rand,1);
