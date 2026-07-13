@@ -71,8 +71,7 @@ class BlimSim():
         self.states_distr += buff
         self.states_distr /= self.states_distr.sum()
     
-    def simulate(self, subjects: int, miss: bool = True, seed: int = 0):
-        self.mlb_runner.rng(seed, nargout=0)
+    def simulate(self, subjects: int, miss: bool = True):
 
         pat, freq, samp = self.mlb_runner.sampleBLIM({
             'beta': self.beta,
@@ -83,10 +82,13 @@ class BlimSim():
         }, subjects, nargout=3)
 
         return np.array(samp, dtype=int)
+    
+    def set_seed(self, seed: int):
+        self.mlb_runner.rng(seed, nargout=0)
 
 if __name__ == "__main__":
-    beta = np.array([0] * 5)[:, np.newaxis]
-    eta = np.array([0] * 5)[:, np.newaxis]
+    beta = np.array([0.1] * 5)[:, np.newaxis]
+    eta = np.array([0.3] * 5)[:, np.newaxis]
 
     surm = np.array([
         [1, 1, 1, 1, 1],
@@ -98,11 +100,13 @@ if __name__ == "__main__":
 
     blim_sim = BlimSim(beta, eta, iita.quasiorder.QuasiOrder(surm), miss=None, items=5, max_noise_sum=0.7)
 
+    blim_sim.set_seed(42)
+
     blim_sim.set_standard_state_distr(sigma=0.4, mu=0.5, mult=1, buff=0)
 
     # print(blim_sim.states)
 
     # print(blim_sim.states_distr)
 
-    samp = blim_sim.simulate(20, miss=False, seed=42)
+    samp = blim_sim.simulate(20, miss=False)
     print(samp)
