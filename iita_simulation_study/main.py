@@ -64,15 +64,17 @@ class Simulation():
             subjects: int,
             beta_range: tuple,
             eta_range: tuple,
+            missprob_wrong_range: tuple = (0, 0),
+            missprob_correct_range: tuple = (0, 0),
             max_noise_sum: float = 0.7,
             sigma: float = 0.1,
             mu: float = 0.5,
             buff: float|np.ndarray = 5,
+            seed: int = 42,
+            miss: bool = False
         ) -> np.ndarray:
         """
         Generates random response patterns optimized for KST.
-
-        No missingness supported yet.
         """
 
         surmise_relation = self.generate_surmise_relation(items, edge_probability)
@@ -82,11 +84,14 @@ class Simulation():
             beta=np.random.uniform(*beta_range, items),
             eta=np.random.uniform(*eta_range, items),
             qo=qo,
-            miss=None, #todo: add missingness support
+            missprob_wrong=
+                np.random.uniform(*missprob_wrong_range, items) if (missprob_wrong_range[1] > 0) else None,
+            missprob_correct=
+                np.random.uniform(*missprob_correct_range, items) if (missprob_correct_range[1] > 0) else None,
             items=items,
             max_noise_sum=max_noise_sum
         )
 
         blim_model.set_standard_state_distr(sigma, mu, buff)
 
-        return blim_model.simulate(subjects, miss=False)
+        return blim_model.simulate(subjects, miss=miss, seed=seed)
