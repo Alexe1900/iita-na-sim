@@ -12,7 +12,7 @@ class Simulation():
         pass
 
     @staticmethod
-    def generate_surmise_relation(items: int, edge_probability: float=0.3) -> np.ndarray:
+    def generate_surmise_relation(items: int, n_clusters: int, edge_probability: float=0.3) -> np.ndarray:
         """
         Generates a valid random surmise relation (quasi-order) optimized for KST.
         """
@@ -20,24 +20,23 @@ class Simulation():
         # Step 1: Shuffle and partition items into random clusters
         shuffled = list(items)
         random.shuffle(shuffled)
-        k = random.randint(min(3, items), items) # Ensure at least 3 clusters
-        clusters = [[] for _ in range(k)]
+        clusters = [[] for _ in range(n_clusters)]
 
         # Ensure no empty clusters
-        for i in range(k):
+        for i in range(n_clusters):
             clusters[i].append(shuffled[i])
-        for item in shuffled[k:]:
+        for item in shuffled[n_clusters:]:
             random.choice(clusters).append(item)
         
         # Step 2: Create compressed adjacency matrix for clusters
-        compressed_matrix = np.zeros((k, k), dtype=int)
+        compressed_matrix = np.zeros((n_clusters, n_clusters), dtype=int)
         
         # Add self-loops on every vertex
         np.fill_diagonal(compressed_matrix, 1)
         
         # Add directed edges from smaller index cluster to larger index cluster
-        for i in range(k):
-            for j in range(i + 1, k):
+        for i in range(n_clusters):
+            for j in range(i + 1, n_clusters):
                 if random.random() < edge_probability:
                     compressed_matrix[i, j] = 1
         
@@ -60,6 +59,7 @@ class Simulation():
     def generate_from_params(
             self,
             items: int,
+            n_clusters: int,
             edge_probability: float,
             subjects: int,
             beta_range: tuple,
@@ -77,7 +77,7 @@ class Simulation():
         Generates random response patterns optimized for KST.
         """
 
-        surmise_relation = self.generate_surmise_relation(items, edge_probability)
+        surmise_relation = self.generate_surmise_relation(items, n_clusters, edge_probability)
         qo = iita.QuasiOrder(surmise_relation)
 
         blim_model = BlimSim(
