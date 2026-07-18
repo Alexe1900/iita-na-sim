@@ -1,1 +1,4 @@
 test.py
+.vscode
+db
+__pycache__

@@ -5,7 +5,9 @@ import pandas as pd
 
 import iita_python as iita
 
-from .blim import BlimSim
+from blim import BlimSim
+
+from iita_python.quasiorder import QuasiOrder
 
 class Simulation():
     def __init__(self):
@@ -18,7 +20,7 @@ class Simulation():
         """
     
         # Step 1: Shuffle and partition items into random clusters
-        shuffled = list(items)
+        shuffled = [i for i in range(items)]
         random.shuffle(shuffled)
         clusters = [[] for _ in range(n_clusters)]
 
@@ -95,3 +97,11 @@ class Simulation():
         blim_model.set_standard_state_distr(sigma, mu, buff)
 
         return blim_model.simulate(subjects, miss=miss, seed=seed)
+    
+if __name__ == "__main__":
+    sim = Simulation()
+    
+    qo = QuasiOrder(sim.generate_surmise_relation(5, 3, 0.5))
+
+    print(qo.full_matrix)
+    print(qo.get_knowledge_space())
