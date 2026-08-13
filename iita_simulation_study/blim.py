@@ -31,8 +31,7 @@ class BlimSim():
             missprob_wrong: np.ndarray | None,
             missprob_correct: np.ndarray | None,
             items: int,
-            max_noise_sum: float = 1,
-            seed: int = 42
+            max_noise_sum: float = 1
         ):
         self.beta = beta
         self.eta = eta
@@ -43,8 +42,6 @@ class BlimSim():
         self.missprob_wrong = missprob_wrong
         self.missprob_correct = missprob_correct
         self.items = items
-
-        self.set_seed(seed)
 
         import os
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -68,7 +65,7 @@ class BlimSim():
         self.beta = beta_sorted
         self.eta = eta_sorted
 
-    def set_standard_state_distr(self, sigma: float, mu: float = 0.5, mult: float|np.ndarray = 1, buff: float|np.ndarray = 0):
+    def set_standard_state_distr(self, sigma: float, mu: float = 0.5, buff: float|np.ndarray = 0, mult: float = 1):
         def gauss(x):
             x_norm = x / self.items
             return np.exp(-0.5 * ((x_norm - mu) / sigma) ** 2)
@@ -78,25 +75,26 @@ class BlimSim():
         self.states_distr += buff
         self.states_distr /= self.states_distr.sum()
     
-    def simulate(self, subjects: int, seed: int, miss: bool = False) -> np.ndarray:
-        self.set_seed(seed)
+    def simulate(self, subjects: int, seed: int | None = None, miss: bool = False) -> np.ndarray:
+        if not (seed is None):
+            self.set_seed(seed)
 
         if (not miss):
             _, _, samp = self.mlb_runner.sampleBLIM({
-                'beta': self.beta,
-                'eta': self.eta,
+                'beta': self.beta[:, np.newaxis],
+                'eta': self.eta[:, np.newaxis],
                 'states': self.states,
-                'pi': self.states_distr,
+                'pi': self.states_distr[:, np.newaxis],
             }, np.double(subjects), nargout=3)
             return np.array(samp)
         else:
             sample = self.mlb_runner.samplenan({
-                'beta': self.beta.astype(np.double),
-                'eta': self.eta.astype(np.double),
+                'beta': self.beta.astype(np.double)[:, np.newaxis],
+                'eta': self.eta.astype(np.double)[:, np.newaxis],
                 'states': self.states.astype(np.double),
-                'pi': self.states_distr.astype(np.double),
-                'mu0': self.missprob_wrong.astype(np.double),
-                'mu1': self.missprob_correct.astype(np.double)
+                'pi': self.states_distr.astype(np.double)[:, np.newaxis],
+                'mu0': self.missprob_wrong.astype(np.double)[:, np.newaxis],
+                'mu1': self.missprob_correct.astype(np.double)[:, np.newaxis]
             }, np.double(subjects), nargout=1)
             return np.array(sample['data'])
 
@@ -105,18 +103,16 @@ class BlimSim():
         self.mlb_runner.rng(seed, nargout=0)
 
 if __name__ == "__main__":
-    beta = np.array([0.1] * 5)[:, np.newaxis]
-    eta = np.array([0.1] * 5)[:, np.newaxis]
+    beta = np.array([0.1] * 3)
+    eta = np.array([0.1] * 3)
 
-    missprob_wrong = np.array([0] * 5)[:, np.newaxis]
-    missprob_correct = np.array([0.5] * 5)[:, np.newaxis]
+    missprob_wrong = np.array([0] * 3)
+    missprob_correct = np.array([0.5] * 3)
 
     surm = np.array([
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1],
-        [0, 0, 1, 1, 1],
-        [0, 0, 0, 1, 1],
-        [0, 0, 0, 0, 1],
+        [1, 1, 1],
+        [0, 1, 1],
+        [0, 0, 1]
     ])
 
     blim_sim = BlimSim(
@@ -125,16 +121,15 @@ if __name__ == "__main__":
         iita.quasiorder.QuasiOrder(surm),
         missprob_wrong,
         missprob_correct,
-        items=5,
-        max_noise_sum=0.7,
-        seed=41
+        items=3,
+        max_noise_sum=0.7
     )
 
-    blim_sim.set_standard_state_distr(sigma=0.4, mu=0.5, mult=1, buff=0)
+    blim_sim.set_standard_state_distr(sigma=0.4, mu=0.5, buff=1)
 
     # print(blim_sim.states)
 
-    # print(blim_sim.states_distr)
+    print(blim_sim.states_distr)
 
-    samp = blim_sim.simulate(20, 41, miss=True)
+    samp = blim_sim.simulate(20, 42, miss=True)
     print(samp)
