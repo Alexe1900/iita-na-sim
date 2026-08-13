@@ -68,16 +68,11 @@ class Simulation():
             eta_range: tuple,
             missprob_wrong_range: tuple = (0, 0),
             missprob_correct_range: tuple = (0, 0),
-            max_noise_sum: float = 0.7,
+            max_noise_sum: float = 1,
             sigma: float = 0.1,
             mu: float = 0.5,
-            buff: float|np.ndarray = 5,
-            seed: int = 42,
-            miss: bool = False
+            flatness: float|None = 0,
         ) -> np.ndarray:
-        """
-        Generates random response patterns optimized for KST.
-        """
 
         surmise_relation = self.generate_surmise_relation(items, n_clusters, edge_probability)
         qo = iita.QuasiOrder(surmise_relation)
@@ -94,9 +89,9 @@ class Simulation():
             max_noise_sum=max_noise_sum
         )
 
-        blim_model.set_standard_state_distr(sigma, mu, buff)
+        blim_model.set_standard_state_distr(sigma, mu, flatness)
 
-        return blim_model.simulate(subjects, miss=miss, seed=seed)
+        return blim_model.simulate(subjects, miss=True), blim_model.simulate(subjects, miss=False)
     
 if __name__ == "__main__":
     sim = Simulation()
