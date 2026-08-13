@@ -65,14 +65,14 @@ class BlimSim():
         self.beta = beta_sorted
         self.eta = eta_sorted
 
-    def set_standard_state_distr(self, sigma: float, mu: float = 0.5, buff: float|np.ndarray = 0, mult: float = 1):
+    def set_standard_state_distr(self, sigma: float, mu: float = 0.5, flatness: float|np.ndarray = 0):
         def gauss(x):
             x_norm = x / self.items
             return np.exp(-0.5 * ((x_norm - mu) / sigma) ** 2)
         
         self.states_distr = gauss(self.states.sum(axis=1))
-        self.states_distr *= mult
-        self.states_distr += buff
+        self.states_distr *= (1 - flatness)
+        self.states_distr += flatness
         self.states_distr /= self.states_distr.sum()
     
     def simulate(self, subjects: int, seed: int | None = None, miss: bool = False) -> np.ndarray:
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         max_noise_sum=0.7
     )
 
-    blim_sim.set_standard_state_distr(sigma=0.4, mu=0.5, buff=1)
+    blim_sim.set_standard_state_distr(sigma=0.4, mu=0.5, flatness=1)
 
     # print(blim_sim.states)
 
