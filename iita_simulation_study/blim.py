@@ -54,6 +54,9 @@ class BlimSim():
 
         sorting_order = np.argsort(predecessors_count)
 
+        self.beta = np.sort(self.beta)
+        self.eta = np.sort(self.eta)
+
         beta_sorted = self.beta[sorting_order]
         eta_sorted = self.eta[np.flip(sorting_order)]
 

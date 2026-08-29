@@ -160,6 +160,5 @@ def generate_resp(item_range: range = range(3, 31)):
                     "states_distr": blim_model.states_distr.tolist(),
                 }, f, indent=4)
 
-            break
-
-generate_resp(range(3, 4))
+if __name__ == "__main__":
+    generate_resp(range(3, 11))
