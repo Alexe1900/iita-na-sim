@@ -8,7 +8,7 @@ import os, json
 
 from blim import BlimSim
 
-DB_PATH = '../../db'
+DB_PATH = '../db'
 
 def scan(item_range: range = range(3, 31)):
     todo = {}
@@ -73,7 +73,7 @@ def generate_params(n):
 
     # choosing missingness type: 1 = MCAR, 2 = MNAR-MAW, 3 = MNAR-MAC
     misstype = np.random.choice([1, 2, 3], size=n)
-    np.append(sample, misstype[:, np.newaxis], axis=1)
+    sample = np.append(sample, misstype[:, np.newaxis], axis=1)
 
     np.random.shuffle(sample)
 
@@ -161,4 +161,4 @@ def generate_resp(item_range: range = range(3, 31)):
                 }, f, indent=4)
 
 if __name__ == "__main__":
-    generate_resp(range(3, 11))
+    generate_resp(range(3, 4))
