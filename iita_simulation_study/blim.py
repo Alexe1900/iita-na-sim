@@ -28,9 +28,9 @@ class BlimSim():
             beta: np.ndarray,
             eta: np.ndarray,
             qo: QuasiOrder,
-            missprob_wrong: np.ndarray | None,
-            missprob_correct: np.ndarray | None,
             items: int,
+            missprob_wrong: np.ndarray | None = None,
+            missprob_correct: np.ndarray | None = None,
             max_noise_sum: float = 1
         ):
         self.beta = beta
