@@ -6,6 +6,8 @@ from iita_python.quasiorder import QuasiOrder
 
 import os, json
 
+from time import sleep
+
 from blim import BlimSim
 
 DB_PATH = '../db'
@@ -161,4 +163,12 @@ def generate_resp(item_range: range = range(3, 31)):
                 }, f, indent=4)
 
 if __name__ == "__main__":
-    generate_resp(range(3, 4))
+    def tr():
+        try:
+            generate_resp(range(30, 31))
+        except TimeoutError:
+            print("ONEDRIVE FAIL")
+            os.system('open -a OneDrive')
+            sleep(10)
+            tr()
+    tr()
